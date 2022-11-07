@@ -1,0 +1,4 @@
+build/
+yt-dlp_*
+node_modules/
+.DS_Store
