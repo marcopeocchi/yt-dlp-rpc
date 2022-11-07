@@ -8,6 +8,18 @@ JSON-RPC 1.0 compliant RPC server for yt-dlp
 - Service.Running -> list of details of all running processes
 - Service.Kill -> kills a process by its PID
 
+## How to run
+yt-dlp path must be passed as Environmental Variable. 
+```sh
+# example
+YT_DLP_PATH=./yt-dlp go run *.go
+```
+By default the server runs on port 4444
+```sh
+# example with different port
+YT_DLP_PATH=./yt-dlp PORT=8080 go run *.go
+```
+
 ## Examples
 All examples are in the **examples** folder
 
