@@ -20,6 +20,8 @@ args = {
   'Params': []
 }
 
+call(rpc, "Service.Exec", args)
+
 while True:
   print(call(rpc, "Service.Running", None))
   time.sleep(1)
