@@ -27,8 +27,8 @@ func (m *MemoryDB) Get(id string) *Process {
 
 // Store a pointer of a process and return its id
 func (m *MemoryDB) Set(process *Process) string {
-	m.mu.Lock()
 	id := uuid.Must(uuid.NewRandom()).String()
+	m.mu.Lock()
 	m.table[id] = process
 	m.mu.Unlock()
 	return id
