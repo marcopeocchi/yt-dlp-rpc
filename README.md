@@ -24,12 +24,19 @@ By default the server runs on port 4444
 # example with different port
 YT_DLP_PATH=./yt-dlp PORT=8080 go run *.go
 ```
+### Run with Docker
 
+```sh
+docker build -t yt-dlp-rpc .
+docker run --name=yt-dlp-rpc -d -p 4444:4444 -v <your directory>:/usr/src/yt-dlp-rpc/downloads yt-dlp-rpc:latest
+```
 ## Examples
 All examples are in the [examples](https://github.com/marcopeocchi/yt-dlp-rpc/tree/master/examples) folder.
 
 ```js
-// get all jobs
+//HTTP POST RPC example
+
+// get all jobs 
 fetch('http://127.0.0.1:4444/rpc', {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
@@ -47,7 +54,7 @@ fetch('http://127.0.0.1:4444/rpc', {
     'method': 'Service.Exec',
     'params': [{
       'URL': 'https://...',
-      'Params': ['-r', '500K'] // any yt-dlp compatible args,
+      'Params': ['-r', '500K', '--no-mtime'] // any compatible args,
     }]
   })
 })

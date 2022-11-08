@@ -23,13 +23,13 @@ const template = `download:
 }`
 
 type ProgressTemplate struct {
-	Resolution string `json:"resolution"`
-	Percentage string `json:"percentage"`
-	Thumbnail  string `json:"thumbnail"`
 	// Title      string  `json:"title"` TODO: effective way to convert unicode titles
-	Speed float32 `json:"speed"`
-	Size  string  `json:"size"`
-	Eta   int     `json:"eta"`
+	Resolution string  `json:"resolution"`
+	Percentage string  `json:"percentage"`
+	Thumbnail  string  `json:"thumbnail"`
+	Speed      float32 `json:"speed"`
+	Size       string  `json:"size"`
+	Eta        int     `json:"eta"`
 }
 
 // Process descriptor
@@ -55,7 +55,7 @@ func (p *Process) Start() {
 		"--no-colors",
 		"--progress-template", strings.ReplaceAll(template, "\n", ""),
 	}, p.params...)
-	params = append(params, "-o", "./%(title)s.%(ext)s")
+	params = append(params, "-o", "./downloads/%(title)s.%(ext)s")
 
 	cmd := exec.Command(driver, params...)
 	r, err := cmd.StdoutPipe()

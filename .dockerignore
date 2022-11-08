@@ -1,0 +1,7 @@
+.github/
+examples/
+build/
+node_modules/
+yt-dlp_*
+README.md
+.DS_Store
