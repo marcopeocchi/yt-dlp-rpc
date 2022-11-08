@@ -1,6 +1,6 @@
 <template>
   <main>
-    <div v-if="results?.length === 0">
+    <div v-if="results.length === 0">
       No active downloads
     </div>
     <div v-else v-for="result in results">
