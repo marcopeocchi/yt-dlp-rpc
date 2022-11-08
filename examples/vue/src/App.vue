@@ -6,10 +6,15 @@
     <div v-else v-for="result in results">
       <img v-bind:src="result.thumbnail" height="200">
       <span>{{ result.url }} - {{ result.percentage }} - {{ result.speed }}</span>
-      <button @click="stopDownload(result.pid)">Stop</button>
+      <button @click="stopDownload(result.id)">Stop</button>
     </div>
+    <label>url</label>
     <input type="text" v-model="url" />
     <button @click="addDownload">Add</button>
+    <div>
+      <label>args</label>
+      <input type="text" v-model="args" />
+    </div>
   </main>
 </template>
 
@@ -20,26 +25,22 @@ export default {
   data() {
     return {
       results: [],
-      url: ''
+      url: '',
+      args: ''
     }
   },
   created() {
-    const getData = () => {
+    setInterval(() => {
       fetch('http://127.0.0.1:4444/rpc', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          'id': 0,
           'method': 'Service.Running',
           'params': []
         })
       })
         .then(res => res.json())
         .then(data => this.results = data.result)
-    }
-    getData()
-    setInterval(() => {
-      getData()
     }, 1000 * 1);
   },
   methods: {
@@ -48,23 +49,21 @@ export default {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          'id': 0,
           'method': 'Service.Exec',
           'params': [{
             'URL': this.url,
-            'Params': [],
+            'Params': this.args.split(' ').map(a => a.trim()),
           }]
         })
       })
     },
-    stopDownload(pid) {
+    stopDownload(id) {
       fetch('http://127.0.0.1:4444/rpc', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          'id': 0,
           'method': 'Service.Kill',
-          'params': [pid]
+          'params': [id]
         })
       })
     }
