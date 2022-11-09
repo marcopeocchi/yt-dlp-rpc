@@ -43,6 +43,16 @@ func (m *MemoryDB) Update(id string, progress Progress) {
 	m.mu.Unlock()
 }
 
+func (m *MemoryDB) UpdateProgress(id string, progress Progress) {
+	m.mu.Lock()
+	if m.table[id] != nil {
+		m.table[id].progress.ETA = progress.ETA
+		m.table[id].progress.Speed = progress.Speed
+		m.table[id].progress.Percentage = progress.Percentage
+	}
+	m.mu.Unlock()
+}
+
 // Removes a process progress, given the process id
 func (m *MemoryDB) Delete(id string) {
 	m.mu.Lock()

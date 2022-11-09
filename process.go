@@ -9,44 +9,44 @@ import (
 	"strings"
 )
 
-var driver = os.Getenv("YT_DLP_PATH")
+var (
+	driver = os.Getenv("YT_DLP_PATH")
+)
 
-// "title":"%(info.title)s",
 const template = `download:
 {
-	"thumbnail":"%(info.thumbnail)s", 
 	"eta":%(progress.eta)s, 
-	"resolution":"%(info.resolution)s", 
 	"percentage":"%(progress._percent_str)s",
-	"speed":%(progress.speed)s, 
-	"size":"%(progress._total_bytes_str)s"
+	"speed":%(progress.speed)s
 }`
 
 type ProgressTemplate struct {
-	// Title      string  `json:"title"` TODO: effective way to convert unicode titles
-	Resolution string  `json:"resolution"`
 	Percentage string  `json:"percentage"`
-	Thumbnail  string  `json:"thumbnail"`
 	Speed      float32 `json:"speed"`
 	Size       string  `json:"size"`
 	Eta        int     `json:"eta"`
 }
 
+type DownloadInfo struct {
+	Title      string `json:"title"`
+	Thumbnail  string `json:"thumbnail"`
+	Resolution string `json:"resolution"`
+}
+
 // Process descriptor
 type Process struct {
 	id       string
-	mem      *MemoryDB
+	pid      int
 	url      string
 	params   []string
-	pid      int
 	progress Progress
+	mem      *MemoryDB
 }
 
 // Starts spawns/forks a new yt-dlp process and parse its stdout.
 // The process is spawned to outputting a custom progress text that
-// Resembles a JSON Object in ordert to Unmarshall it later.
-// This approach is anyhow not perfect. Unicode strings are not escaped
-// so unmarshall a json is not that trivial.
+// Resembles a YAML Object in order to Unmarshal it later.
+// This approach is anyhow not perfect: quotes are not escaped properly.
 // Each process is identified not by its PID but by a UUIDv2
 func (p *Process) Start() {
 	params := append([]string{
@@ -57,6 +57,7 @@ func (p *Process) Start() {
 	}, p.params...)
 	params = append(params, "-o", "./downloads/%(title)s.%(ext)s")
 
+	// ----------------- main block ----------------- //
 	cmd := exec.Command(driver, params...)
 	r, err := cmd.StdoutPipe()
 	if err != nil {
@@ -72,6 +73,26 @@ func (p *Process) Start() {
 	p.pid = cmd.Process.Pid
 	p.id = p.mem.Set(p)
 
+	// ----------------- info block ----------------- //
+	// spawn a goroutine that retrieves the info for the download
+	go func() {
+		cmd := exec.Command(driver, p.url, "-J")
+		stdout, err := cmd.Output()
+		if err != nil {
+			log.Println("Cannot retrieve info for", p.url)
+		}
+		info := DownloadInfo{}
+		json.Unmarshal(stdout, &info)
+		p.mem.Update(p.id, Progress{
+			Title:      info.Title,
+			Thumbnail:  info.Thumbnail,
+			Resolution: info.Resolution,
+			Id:         p.id,
+		})
+	}()
+
+	// --------------- end info block --------------- //
+
 	// spawn a goroutine that does the dirty job of parsing the stdout
 	go func() {
 		defer cmd.Wait()
@@ -81,14 +102,10 @@ func (p *Process) Start() {
 			stdout := ProgressTemplate{}
 			err := json.Unmarshal([]byte(scan.Text()), &stdout)
 			if err == nil {
-				p.mem.Update(p.id, Progress{
+				p.mem.UpdateProgress(p.id, Progress{
 					Percentage: stdout.Percentage,
-					Thumbnail:  stdout.Thumbnail,
-					// Title:      stdout.Title,
-					Speed: stdout.Speed,
-					Size:  stdout.Size,
-					URL:   p.url,
-					Id:    p.id,
+					Speed:      stdout.Speed,
+					ETA:        stdout.Eta,
 				})
 			}
 		}

@@ -2,6 +2,7 @@ package main
 
 type Progress struct {
 	Percentage string  `json:"percentage"`
+	Resolution string  `json:"resolution"`
 	Thumbnail  string  `json:"thumbnail"`
 	Title      string  `json:"title"`
 	Speed      float32 `json:"speed"`

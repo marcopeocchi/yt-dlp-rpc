@@ -5,7 +5,7 @@
     </div>
     <div v-else v-for="result in results">
       <img v-bind:src="result.thumbnail" height="200">
-      <span>{{ result.url }} - {{ result.percentage }} - {{ result.speed }}</span>
+      <span>{{ result.title }} - {{ result.percentage }} - {{ result.speed }}</span>
       <button @click="stopDownload(result.id)">Stop</button>
     </div>
     <label>url</label>
@@ -32,15 +32,15 @@ export default {
   },
   created() {
     const getRunning = () => this.socket.send(JSON.stringify({
-      'method': 'Service.Running',
-      'params': []
+      method: 'Service.Running',
+      params: []
     }))
 
     this.socket.onopen = () => getRunning
 
     this.socket.onmessage = (event) => {
       const data = JSON.parse(event.data)
-      this.results = data.result
+      this.results = data.result.filter(u => !!u)
     }
 
     setInterval(() => {
@@ -50,17 +50,17 @@ export default {
   methods: {
     addDownload() {
       this.socket.send(JSON.stringify({
-        'method': 'Service.Exec',
-        'params': [{
-          'URL': this.url,
-          'Params': this.args.split(' ').map(a => a.trim()),
+        method: 'Service.Exec',
+        params: [{
+          URL: this.url,
+          Params: this.args.split(' ').map(a => a.trim()),
         }]
       }))
     },
     stopDownload(id) {
       this.socket.send(JSON.stringify({
-        'method': 'Service.Kill',
-        'params': [id]
+        method: 'Service.Kill',
+        params: [id]
       }))
     }
   }
