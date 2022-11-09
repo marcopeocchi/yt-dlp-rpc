@@ -50,7 +50,7 @@ type Process struct {
 // Each process is identified not by its PID but by a UUIDv2
 func (p *Process) Start() {
 	params := append([]string{
-		p.url,
+		strings.Split(p.url, "?list")[0], //no playlist
 		"--newline",
 		"--no-colors",
 		"--progress-template", strings.ReplaceAll(template, "\n", ""),
