@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"strings"
+	"time"
 )
 
 var (
@@ -94,22 +95,30 @@ func (p *Process) Start() {
 	// --------------- end info block --------------- //
 
 	// spawn a goroutine that does the dirty job of parsing the stdout
+	eventChan := make(chan string)
+
+	// fill the channel with as many stdout line as yt-dlp produces (producer)
 	go func() {
 		defer cmd.Wait()
 		defer r.Close()
 		defer p.Kill()
 		for scan.Scan() {
-			stdout := ProgressTemplate{}
-			err := json.Unmarshal([]byte(scan.Text()), &stdout)
-			if err == nil {
-				p.mem.UpdateProgress(p.id, Progress{
-					Percentage: stdout.Percentage,
-					Speed:      stdout.Speed,
-					ETA:        stdout.Eta,
-				})
-			}
+			eventChan <- scan.Text()
 		}
 	}()
+
+	// debounce the unmarshal operation by 500ms (consumer)
+	go debounce(time.Millisecond*500, eventChan, func(text string) {
+		stdout := ProgressTemplate{}
+		err := json.Unmarshal([]byte(text), &stdout)
+		if err == nil {
+			p.mem.UpdateProgress(p.id, Progress{
+				Percentage: stdout.Percentage,
+				Speed:      stdout.Speed,
+				ETA:        stdout.Eta,
+			})
+		}
+	})
 }
 
 // Kill a process and remove it from the memory
