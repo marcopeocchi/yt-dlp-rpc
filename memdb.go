@@ -35,23 +35,18 @@ func (m *MemoryDB) Set(process *Process) string {
 }
 
 // Update a process progress, given the process id
-func (m *MemoryDB) Update(id string, progress Progress) {
+func (m *MemoryDB) Update(id string, info DownloadInfo) {
 	m.mu.Lock()
 	if m.table[id] != nil {
-		m.table[id].progress.Id = id
-		m.table[id].progress.Title = progress.Title
-		m.table[id].progress.Thumbnail = progress.Thumbnail
-		m.table[id].progress.Resolution = progress.Resolution
+		m.table[id].Info = info
 	}
 	m.mu.Unlock()
 }
 
-func (m *MemoryDB) UpdateProgress(id string, progress Progress) {
+func (m *MemoryDB) UpdateProgress(id string, progress DownloadProgress) {
 	m.mu.Lock()
 	if m.table[id] != nil {
-		m.table[id].progress.ETA = progress.ETA
-		m.table[id].progress.Speed = progress.Speed
-		m.table[id].progress.Percentage = progress.Percentage
+		m.table[id].Progress = progress
 	}
 	m.mu.Unlock()
 }
@@ -77,12 +72,16 @@ func (m *MemoryDB) Keys() []string {
 }
 
 // Returns a slice of all currently stored processes progess
-func (m *MemoryDB) All() []Progress {
-	running := make([]Progress, len(m.table))
+func (m *MemoryDB) All() []ProcessResponse {
+	running := make([]ProcessResponse, len(m.table))
 	i := 0
-	for _, v := range m.table {
+	for k, v := range m.table {
 		if v != nil {
-			running[i] = v.progress
+			running[i] = ProcessResponse{
+				Id:       k,
+				Info:     v.Info,
+				Progress: v.Progress,
+			}
 			i++
 		}
 	}

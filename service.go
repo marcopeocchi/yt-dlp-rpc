@@ -6,7 +6,7 @@ import (
 
 type Service int
 
-type Running []Progress
+type Running []ProcessResponse
 type Pending []string
 
 type NoArgs struct{}
@@ -27,8 +27,8 @@ func (t *Service) Exec(args Args, result *string) error {
 }
 
 // Progess retrieves the Progress of a specific Process given its Id
-func (t *Service) Progess(args Args, progress *Progress) error {
-	*progress = db.Get(args.Id).progress
+func (t *Service) Progess(args Args, progress *DownloadProgress) error {
+	*progress = db.Get(args.Id).Progress
 	return nil
 }
 

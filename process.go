@@ -28,18 +28,13 @@ type ProgressTemplate struct {
 	Eta        int     `json:"eta"`
 }
 
-type DownloadInfo struct {
-	Title      string `json:"title"`
-	Thumbnail  string `json:"thumbnail"`
-	Resolution string `json:"resolution"`
-}
-
 // Process descriptor
 type Process struct {
 	id       string
 	url      string
 	params   []string
-	progress Progress
+	Info     DownloadInfo
+	Progress DownloadProgress
 	mem      *MemoryDB
 	proc     *os.Process
 }
@@ -84,11 +79,11 @@ func (p *Process) Start() {
 		}
 		info := DownloadInfo{}
 		json.Unmarshal(stdout, &info)
-		p.mem.Update(p.id, Progress{
+		p.mem.Update(p.id, DownloadInfo{
+			URL:        p.url,
 			Title:      info.Title,
 			Thumbnail:  info.Thumbnail,
 			Resolution: info.Resolution,
-			Id:         p.id,
 		})
 	}()
 
@@ -110,7 +105,7 @@ func (p *Process) Start() {
 		stdout := ProgressTemplate{}
 		err := json.Unmarshal([]byte(text), &stdout)
 		if err == nil {
-			p.mem.UpdateProgress(p.id, Progress{
+			p.mem.UpdateProgress(p.id, DownloadProgress{
 				Percentage: stdout.Percentage,
 				Speed:      stdout.Speed,
 				ETA:        stdout.Eta,
