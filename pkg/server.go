@@ -12,9 +12,11 @@ import (
 	"golang.org/x/net/websocket"
 )
 
+// Package available variables
 var (
-	db   = MemoryDB{}
-	port = os.Getenv("PORT")
+	db     = MemoryDB{}
+	port   = os.Getenv("PORT")
+	driver = os.Getenv("YT_DLP_PATH")
 )
 
 func init() {
@@ -24,6 +26,7 @@ func init() {
 	}
 }
 
+// Enable WebSockets as transport protocol
 func serveWS(ws *websocket.Conn) {
 	jsonrpc.ServeConn(ws)
 }
@@ -43,7 +46,7 @@ func enableCors(w *http.ResponseWriter) {
 }
 
 // Run blocking HTTP Server with WS upgrader
-func Run() {
+func RunBlocking() {
 	service := new(Service)
 	err := rpc.Register(service)
 	if err != nil {

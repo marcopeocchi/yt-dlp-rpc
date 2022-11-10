@@ -8,10 +8,8 @@ import (
 	"os/exec"
 	"strings"
 	"time"
-)
 
-var (
-	driver = os.Getenv("YT_DLP_PATH")
+	"goytdlp.rpc/m/pkg/rx"
 )
 
 const template = `download:
@@ -102,7 +100,7 @@ func (p *Process) Start() {
 	}()
 
 	// debounce the unmarshal operation by 500ms (consumer)
-	go debounce(time.Millisecond*500, eventChan, func(text string) {
+	go rx.Debounce(time.Millisecond*500, eventChan, func(text string) {
 		stdout := ProgressTemplate{}
 		err := json.Unmarshal([]byte(text), &stdout)
 		if err == nil {

@@ -14,6 +14,8 @@ type DownloadInfo struct {
 	Size       string `json:"size"`
 }
 
+// struct representing the response sent to the client
+// as JSON-RPC result field
 type ProcessResponse struct {
 	Id       string           `json:"id"`
 	Progress DownloadProgress `json:"progress"`

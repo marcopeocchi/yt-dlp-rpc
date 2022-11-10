@@ -6,7 +6,7 @@ import (
 	"github.com/google/uuid"
 )
 
-// In-Memory Fast Key-Value Storage/DB
+// In-Memory Thread-Safe Key-Value Storage
 type MemoryDB struct {
 	table map[string]*Process
 	mu    sync.Mutex
@@ -34,7 +34,7 @@ func (m *MemoryDB) Set(process *Process) string {
 	return id
 }
 
-// Update a process progress, given the process id
+// Update a process info/metadata, given the process id
 func (m *MemoryDB) Update(id string, info DownloadInfo) {
 	m.mu.Lock()
 	if m.table[id] != nil {
@@ -43,6 +43,8 @@ func (m *MemoryDB) Update(id string, info DownloadInfo) {
 	m.mu.Unlock()
 }
 
+// Update a process progress data, given the process id
+// Used for updating completition percentage or ETA
 func (m *MemoryDB) UpdateProgress(id string, progress DownloadProgress) {
 	m.mu.Lock()
 	if m.table[id] != nil {

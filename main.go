@@ -14,5 +14,5 @@ import "goytdlp.rpc/m/pkg"
 //
 // https://github.com/marcopeocchi/yt-dlp-rpc
 func main() {
-	pkg.Run()
+	pkg.RunBlocking()
 }
