@@ -95,6 +95,7 @@ func (p *Process) Start() {
 	go func() {
 		defer cmd.Wait()
 		defer r.Close()
+		defer p.Kill()
 		for scan.Scan() {
 			eventChan <- scan.Text()
 		}
