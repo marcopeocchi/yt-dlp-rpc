@@ -4,7 +4,7 @@ RUN mkdir -p /usr/src/yt-dlp-rpc/download
 VOLUME /usr/src/yt-dlp-rpc/downloads
 WORKDIR /usr/src/yt-dlp-rpc
 
-RUN apk add curl wget psmisc python3 ffmpeg
+RUN apk add curl psmisc python3 ffmpeg
 
 COPY . .
 RUN chmod +x ./fetch-yt-dlp.sh

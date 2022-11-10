@@ -19,7 +19,7 @@ type Args struct {
 // Exec spawns a Process.
 // The result of the execution is the newly spawned process Id.
 func (t *Service) Exec(args Args, result *string) error {
-	log.Printf("Spawning new service for %s\n", args.URL)
+	log.Printf("Spawning new process for %s\n", args.URL)
 	p := Process{mem: &db, url: args.URL, params: args.Params}
 	p.Start()
 	*result = p.id

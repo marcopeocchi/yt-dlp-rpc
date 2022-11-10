@@ -38,6 +38,7 @@ func (m *MemoryDB) Set(process *Process) string {
 func (m *MemoryDB) Update(id string, progress Progress) {
 	m.mu.Lock()
 	if m.table[id] != nil {
+		m.table[id].progress.Id = id
 		m.table[id].progress.Title = progress.Title
 		m.table[id].progress.Thumbnail = progress.Thumbnail
 		m.table[id].progress.Resolution = progress.Resolution

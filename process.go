@@ -37,11 +37,11 @@ type DownloadInfo struct {
 // Process descriptor
 type Process struct {
 	id       string
-	pid      int
 	url      string
 	params   []string
 	progress Progress
 	mem      *MemoryDB
+	proc     *os.Process
 }
 
 // Starts spawns/forks a new yt-dlp process and parse its stdout.
@@ -71,8 +71,8 @@ func (p *Process) Start() {
 		log.Panicln(err)
 	}
 
-	p.pid = cmd.Process.Pid
 	p.id = p.mem.Set(p)
+	p.proc = cmd.Process
 
 	// ----------------- info block ----------------- //
 	// spawn a goroutine that retrieves the info for the download
@@ -92,8 +92,7 @@ func (p *Process) Start() {
 		})
 	}()
 
-	// --------------- end info block --------------- //
-
+	// --------------- progress block --------------- //
 	// spawn a goroutine that does the dirty job of parsing the stdout
 	eventChan := make(chan string)
 
@@ -101,7 +100,6 @@ func (p *Process) Start() {
 	go func() {
 		defer cmd.Wait()
 		defer r.Close()
-		defer p.Kill()
 		for scan.Scan() {
 			eventChan <- scan.Text()
 		}
@@ -116,18 +114,16 @@ func (p *Process) Start() {
 				Percentage: stdout.Percentage,
 				Speed:      stdout.Speed,
 				ETA:        stdout.Eta,
-				Id:         p.id,
 			})
 		}
 	})
+	// ------------- end progress block ------------- //
 }
 
 // Kill a process and remove it from the memory
 func (p *Process) Kill() error {
-	cmd := exec.Command("kill", []string{string(rune(p.pid))}...)
-	cmd.Start()
-	err := cmd.Wait()
+	err := p.proc.Kill()
 	p.mem.Delete(p.id)
-	log.Printf("Killed process %d\n", p.pid)
+	log.Printf("Killed process %s\n", p.id)
 	return err
 }
