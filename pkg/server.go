@@ -1,4 +1,4 @@
-package main
+package pkg
 
 import (
 	"fmt"
@@ -36,12 +36,14 @@ func serveHTTP(w http.ResponseWriter, r *http.Request) {
 	io.Copy(w, res)
 }
 
+// Enable CORS for every origin
 func enableCors(w *http.ResponseWriter) {
 	(*w).Header().Set("Access-Control-Allow-Origin", "*")
 	(*w).Header().Set("Access-Control-Allow-Headers", "*")
 }
 
-func main() {
+// Run blocking HTTP Server with WS upgrader
+func Run() {
 	service := new(Service)
 	err := rpc.Register(service)
 	if err != nil {

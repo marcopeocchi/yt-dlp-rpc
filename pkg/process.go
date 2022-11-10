@@ -1,4 +1,4 @@
-package main
+package pkg
 
 import (
 	"bufio"
@@ -41,7 +41,7 @@ type Process struct {
 
 // Starts spawns/forks a new yt-dlp process and parse its stdout.
 // The process is spawned to outputting a custom progress text that
-// Resembles a YAML Object in order to Unmarshal it later.
+// Resembles a JSON Object in order to Unmarshal it later.
 // This approach is anyhow not perfect: quotes are not escaped properly.
 // Each process is identified not by its PID but by a UUIDv2
 func (p *Process) Start() {
@@ -95,7 +95,7 @@ func (p *Process) Start() {
 	go func() {
 		defer cmd.Wait()
 		defer r.Close()
-		defer p.Kill()
+		defer p.Complete()
 		for scan.Scan() {
 			eventChan <- scan.Text()
 		}
@@ -114,6 +114,17 @@ func (p *Process) Start() {
 		}
 	})
 	// ------------- end progress block ------------- //
+}
+
+// Keep process in the memoryDB but marks it as complete
+// Convention: All completed processes has progress -1
+// and speed 0 bps.
+func (p *Process) Complete() {
+	p.mem.UpdateProgress(p.id, DownloadProgress{
+		Percentage: "-1",
+		Speed:      0,
+		ETA:        0,
+	})
 }
 
 // Kill a process and remove it from the memory

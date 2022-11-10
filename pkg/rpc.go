@@ -1,4 +1,4 @@
-package main
+package pkg
 
 import (
 	"bytes"
@@ -6,6 +6,7 @@ import (
 	"net/rpc/jsonrpc"
 )
 
+// Wrapper for HTTP RPC request that implements io.Reader interface
 type rpcRequest struct {
 	r    io.Reader
 	rw   io.ReadWriter
