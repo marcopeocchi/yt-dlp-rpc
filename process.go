@@ -116,6 +116,7 @@ func (p *Process) Start() {
 				Percentage: stdout.Percentage,
 				Speed:      stdout.Speed,
 				ETA:        stdout.Eta,
+				Id:         p.id,
 			})
 		}
 	})
