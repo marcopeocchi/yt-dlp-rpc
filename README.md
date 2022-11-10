@@ -59,3 +59,10 @@ fetch('http://127.0.0.1:4444/rpc', {
   })
 })
 ```
+
+## Notes
+
+Updating yt-dlp executable has to be done from the running container
+```sh
+docker exec -it container-name /usr/src/yt-dlp-rpc/fetch-yt-dlp.sh
+```

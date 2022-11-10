@@ -8,7 +8,7 @@ RUN apk add curl psmisc python3 ffmpeg
 
 COPY . .
 RUN chmod +x ./fetch-yt-dlp.sh
-RUN sh ./fetch-yt-dlp.sh
+RUN ./fetch-yt-dlp.sh
 
 RUN go build -o yt-dlp-rpc *.go
 
