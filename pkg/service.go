@@ -2,6 +2,9 @@ package pkg
 
 import (
 	"log"
+	"os"
+
+	"golang.org/x/sys/unix"
 )
 
 type Service int
@@ -65,5 +68,17 @@ func (t *Service) KillAll(args NoArgs, killed *string) error {
 			proc.Kill()
 		}
 	}
+	return err
+}
+
+// FreeSpace gets the available Bytes writable to current working directory
+func (t *Service) FreeSpace(args NoArgs, free *uint64) error {
+	var stat unix.Statfs_t
+	wd, err := os.Getwd()
+	if err != nil {
+		return err
+	}
+	unix.Statfs(wd+"/downloads", &stat)
+	*free = stat.Bavail * uint64(stat.Bsize)
 	return err
 }
