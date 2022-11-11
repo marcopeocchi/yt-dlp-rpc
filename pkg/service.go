@@ -2,9 +2,8 @@ package pkg
 
 import (
 	"log"
-	"os"
 
-	"golang.org/x/sys/unix"
+	"goytdlp.rpc/m/pkg/sys"
 )
 
 type Service int
@@ -71,14 +70,9 @@ func (t *Service) KillAll(args NoArgs, killed *string) error {
 	return err
 }
 
-// FreeSpace gets the available Bytes writable to current working directory
+// FreeSpace gets the available from package sys util
 func (t *Service) FreeSpace(args NoArgs, free *uint64) error {
-	var stat unix.Statfs_t
-	wd, err := os.Getwd()
-	if err != nil {
-		return err
-	}
-	unix.Statfs(wd+"/downloads", &stat)
-	*free = stat.Bavail * uint64(stat.Bsize)
+	freeSpace, err := sys.FreeSpace()
+	*free = freeSpace
 	return err
 }
