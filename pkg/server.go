@@ -20,7 +20,7 @@ var (
 )
 
 func init() {
-	db.Init()
+	db.New()
 	if port == "" {
 		port = "4444"
 	}
@@ -55,6 +55,6 @@ func RunBlocking() {
 	http.HandleFunc("/rpc", serveHTTP)
 	http.Handle("/rpc-ws", websocket.Handler(serveWS))
 
-	log.Println("Started RPC server")
+	log.Printf("Started RPC server on port %s\n/rpc\t-> HTTP POST Endpoint\n/rpc-ws\t-> WebSockets Endpoint\n", port)
 	http.ListenAndServe(fmt.Sprintf(":%s", port), nil)
 }

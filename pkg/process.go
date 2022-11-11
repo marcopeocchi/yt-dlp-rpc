@@ -2,12 +2,14 @@ package pkg
 
 import (
 	"bufio"
-	"encoding/json"
+
 	"log"
 	"os"
 	"os/exec"
 	"strings"
 	"time"
+
+	jsoniter "github.com/json-iterator/go"
 
 	"goytdlp.rpc/m/pkg/rx"
 )
@@ -18,6 +20,10 @@ const template = `download:
 	"percentage":"%(progress._percent_str)s",
 	"speed":%(progress.speed)s
 }`
+
+var (
+	json = jsoniter.ConfigCompatibleWithStandardLibrary
+)
 
 type ProgressTemplate struct {
 	Percentage string  `json:"percentage"`
@@ -47,9 +53,11 @@ func (p *Process) Start() {
 		strings.Split(p.url, "?list")[0], //no playlist
 		"--newline",
 		"--no-colors",
+		"--no-playlist",
 		"--progress-template", strings.ReplaceAll(template, "\n", ""),
+		"-o",
+		"./downloads/%(title)s.%(ext)s",
 	}, p.params...)
-	params = append(params, "-o", "./downloads/%(title)s.%(ext)s")
 
 	// ----------------- main block ----------------- //
 	cmd := exec.Command(driver, params...)

@@ -6,14 +6,14 @@ import (
 	"github.com/google/uuid"
 )
 
-// In-Memory Thread-Safe Key-Value Storage
+// In-Memory volatile Thread-Safe Key-Value Storage
 type MemoryDB struct {
 	table map[string]*Process
 	mu    sync.Mutex
 }
 
 // Inits the db with an empty map of string->Process pointer
-func (m *MemoryDB) Init() {
+func (m *MemoryDB) New() {
 	m.table = make(map[string]*Process)
 }
 
