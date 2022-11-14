@@ -10,6 +10,7 @@ import (
 	"os"
 
 	"golang.org/x/net/websocket"
+	"goytdlp.rpc/m/pkg/cli"
 )
 
 // Package available variables
@@ -47,14 +48,21 @@ func enableCors(w *http.ResponseWriter) {
 
 // Run blocking HTTP Server with WS upgrader
 func RunBlocking() {
+	uid := os.Getuid()
+	if uid == 0 {
+		log.Println(cli.Yellow, "You're running this program as root (UID 0)", cli.Reset)
+		log.Println(cli.Yellow, "This isn't reccomended unless you're using Docker", cli.Reset)
+	}
+
 	service := new(Service)
 	err := rpc.Register(service)
 	if err != nil {
 		log.Fatal("Something has gone terribly wrong :)")
 	}
+
 	http.HandleFunc("/rpc", serveHTTP)
 	http.Handle("/rpc-ws", websocket.Handler(serveWS))
 
-	log.Printf("Started RPC server on port %s\n/rpc\t-> HTTP POST Endpoint\n/rpc-ws\t-> WebSockets Endpoint\n", port)
+	log.Printf("Started RPC server on port %s\n/rpc\t-> HTTP POST Handler\n/rpc-ws\t-> WebSocket Handler\n", port)
 	http.ListenAndServe(fmt.Sprintf(":%s", port), nil)
 }

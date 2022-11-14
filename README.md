@@ -3,19 +3,20 @@
 JSON-RPC 1.0 compliant RPC server for yt-dlp. Heavily inspired from Aria2 RPC.
 HTTP POST and WebSockets are the available transport protocols.
 
-## RPC exposed Methods (overview)
+## RPC overview
 
-| Method          | Parameters                        | Description                                                       |
-|-----------------|-----------------------------------|-------------------------------------------------------------------|
-| Service.Exec    | { URL: string, Params: string[] } | Starts a new process. Params is a list of yt-dlp params/arguments |
-| Service.Result  | string                            | Progress of a single process                                      |
-| Service.Running | -                                 | List of of all running processes progress                         |
-| Service.Kill    | string                            | Kills a process by its id                                         |
-| Service.KillAll | -                                 | Kills all processes                                               |
+| Function          | Parameters                        | Description                                                       |
+|-------------------|-----------------------------------|-------------------------------------------------------------------|
+| Service.Exec      | { URL: string, Params: string[] } | Starts a new process. Params is a list of yt-dlp params/arguments |
+| Service.Result    | string                            | Progress of a single process                                      |
+| Service.Running   | null                              | List of of all running processes progress                         |
+| Service.Kill      | string                            | Kills a process given its id                                      |
+| Service.KillAll   | null                              | Kills all processes                                               |
+| Service.FreeSpace | null                              | Gets download directory writable bytes (free space) in GBs        |
 
 ## Response sent to RPC client
 Client sends -> 
-```json
+```json5
 {
   "id": 1,  //seq number (optional)
   "method":"Service.Exec", 
@@ -25,12 +26,12 @@ Client sends ->
   }]
 }
 ```
-Client sends (busy-waiting) -> 
+Client periodically sends (busy-waiting) -> 
 ```json
 {"id":2,"method":"Service.Running","params":[]}
 ```
 <- Client Receives
-```json
+```json5
 {
   "id": 2,  // seq number
   "result":[
@@ -98,7 +99,7 @@ fetch('http://127.0.0.1:4444/rpc', {
     'method': 'Service.Exec',
     'params': [{
       'URL': 'https://...',
-      'Params': ['-r', '500K', '--no-mtime'] // any compatible args,
+      'Params': ['-r', '500K', '--no-mtime'] // any compatible arg,
     }]
   })
 })

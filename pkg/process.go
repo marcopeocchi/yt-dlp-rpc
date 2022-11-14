@@ -47,7 +47,7 @@ type Process struct {
 // The process is spawned to outputting a custom progress text that
 // Resembles a JSON Object in order to Unmarshal it later.
 // This approach is anyhow not perfect: quotes are not escaped properly.
-// Each process is identified not by its PID but by a UUIDv2
+// Each process is not identified by its PID but by a UUIDv2
 func (p *Process) Start() {
 	params := append([]string{
 		strings.Split(p.url, "?list")[0], //no playlist
