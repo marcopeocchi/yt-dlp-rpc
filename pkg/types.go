@@ -11,7 +11,10 @@ type DownloadInfo struct {
 	Title      string `json:"title"`
 	Thumbnail  string `json:"thumbnail"`
 	Resolution string `json:"resolution"`
-	Size       string `json:"size"`
+	Size       int32  `json:"filesize_approx"`
+	VCodec     string `json:"vcodec"`
+	ACodec     string `json:"acodec"`
+	Extension  string `json:"ext"`
 }
 
 // struct representing the response sent to the client
@@ -20,4 +23,10 @@ type ProcessResponse struct {
 	Id       string           `json:"id"`
 	Progress DownloadProgress `json:"progress"`
 	Info     DownloadInfo     `json:"info"`
+}
+
+// struct representing the current status of the memoryDB
+// used for serializaton/persistence reasons
+type Session struct {
+	Processes []ProcessResponse `json:"processes"`
 }

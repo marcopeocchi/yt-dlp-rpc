@@ -12,6 +12,5 @@ RUN ./fetch-yt-dlp.sh
 
 RUN go build -o yt-dlp-rpc *.go
 
-ENV YT_DLP_PATH="./yt-dlp"
 EXPOSE 4444
-CMD [ "./yt-dlp-rpc" ]
+CMD [ "./yt-dlp-rpc", "--driver", "./yt-dlp", "--port", "4444" ]

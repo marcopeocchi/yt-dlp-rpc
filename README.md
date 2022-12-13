@@ -33,21 +33,23 @@ Client periodically sends (busy-waiting) ->
 <- Client Receives
 ```json5
 {
-  "id": 2,  // seq number
+  "id": 2,                            // seq number
   "result":[
     {
       "id": "4d5e97d7-25b1-4f5f-bf3e-b8e086ab6b9e",
       "progress": {
-        "percentage": " 29.1%",  // completition%
-        "speed": 5387927,        // speed in Bps
-        "eta": 20                // ETA in seconds
+        "percentage": " 29.1%",       // completion %
+        "speed": 5387927,             // speed in Bps
+        "eta": 20                     // ETA in seconds
       },
       "info": {
         "url": "my-url",
         "title": "my-url title",
         "thumbnail": "my-url thumbnail",
         "resolution": "3840x2160",
-        "size": ""
+        "filesize_approx": 83294723,  // filesize in bytes
+        "acodec": "opus",
+        "vcodec": "webm"
       }
     }
   ],
@@ -58,15 +60,11 @@ Client periodically sends (busy-waiting) ->
 ![seq-diagram](https://i.ibb.co/Gd9MvHy/Untitled.png)
 
 ## How to run
-yt-dlp path must be passed as Environmental Variable. 
 ```sh
 # example
-YT_DLP_PATH=./yt-dlp go run *.go
-```
-By default the server runs on port 4444
-```sh
-# example with different port
-YT_DLP_PATH=./yt-dlp PORT=8080 go run *.go
+go run *.go --driver=/usr/local/bin/yt-dlp --port 7900
+# driver flag defaults to "yt-dlp" (ensure yt-dlp is in PATH)
+# port flag defaults to port 4444
 ```
 
 ### Run with Docker

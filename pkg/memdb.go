@@ -1,9 +1,12 @@
 package pkg
 
 import (
+	"log"
+	"os"
 	"sync"
 
 	"github.com/google/uuid"
+	"goytdlp.rpc/m/pkg/cli"
 )
 
 // In-Memory volatile Thread-Safe Key-Value Storage
@@ -88,4 +91,29 @@ func (m *MemoryDB) All() []ProcessResponse {
 		}
 	}
 	return running
+}
+
+// WIP: Persist the database in a single file named "session.dat"
+func (m *MemoryDB) Persist() {
+	running := m.All()
+
+	session, err := json.Marshal(Session{
+		Processes: running,
+	})
+	if err != nil {
+		log.Println(cli.Red, "Failed to persist database", cli.Reset)
+		return
+	}
+
+	err = os.WriteFile("session.dat", session, 0700)
+	if err != nil {
+		log.Println(cli.Red, "Failed to persist database", cli.Reset)
+	}
+}
+
+// WIP: Restore a persisted state
+func (m *MemoryDB) Restore() {
+	feed, _ := os.ReadFile("session.dat")
+	session := Session{}
+	json.Unmarshal(feed, &session)
 }

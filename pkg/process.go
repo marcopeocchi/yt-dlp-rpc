@@ -9,8 +9,6 @@ import (
 	"strings"
 	"time"
 
-	jsoniter "github.com/json-iterator/go"
-
 	"goytdlp.rpc/m/pkg/rx"
 )
 
@@ -20,10 +18,6 @@ const template = `download:
 	"percentage":"%(progress._percent_str)s",
 	"speed":%(progress.speed)s
 }`
-
-var (
-	json = jsoniter.ConfigCompatibleWithStandardLibrary
-)
 
 type ProgressTemplate struct {
 	Percentage string  `json:"percentage"`
@@ -83,20 +77,16 @@ func (p *Process) Start() {
 		if err != nil {
 			log.Println("Cannot retrieve info for", p.url)
 		}
-		info := DownloadInfo{}
+		info := DownloadInfo{URL: p.url}
 		json.Unmarshal(stdout, &info)
-		p.mem.Update(p.id, DownloadInfo{
-			URL:        p.url,
-			Title:      info.Title,
-			Thumbnail:  info.Thumbnail,
-			Resolution: info.Resolution,
-		})
+		p.mem.Update(p.id, info)
 	}()
 
 	// --------------- progress block --------------- //
-	// spawn a goroutine that does the dirty job of parsing the stdout
+	// unbuffered channe connected to stdout
 	eventChan := make(chan string)
 
+	// spawn a goroutine that does the dirty job of parsing the stdout
 	// fill the channel with as many stdout line as yt-dlp produces (producer)
 	go func() {
 		defer cmd.Wait()

@@ -1,6 +1,7 @@
 package pkg
 
 import (
+	"flag"
 	"fmt"
 	"io"
 	"log"
@@ -9,26 +10,30 @@ import (
 	"net/rpc/jsonrpc"
 	"os"
 
+	jsoniter "github.com/json-iterator/go"
 	"golang.org/x/net/websocket"
 	"goytdlp.rpc/m/pkg/cli"
 )
 
 // Package available variables
 var (
-	db     = MemoryDB{}
-	port   = os.Getenv("PORT")
-	driver = os.Getenv("YT_DLP_PATH")
+	port   string
+	driver string
+
+	db   = MemoryDB{}
+	json = jsoniter.ConfigCompatibleWithStandardLibrary
 )
 
 func init() {
 	db.New()
-	if port == "" {
-		port = "4444"
-	}
+	flag.StringVar(&port, "port", "4444", "port where RPC server will listen")
+	flag.StringVar(&driver, "driver", "yt-dlp", "yt-dlp executable path")
+	flag.Parse()
 }
 
 // Enable WebSockets as transport protocol
 func serveWS(ws *websocket.Conn) {
+	log.Println(ws.Request().RemoteAddr, "connected")
 	jsonrpc.ServeConn(ws)
 }
 
@@ -50,8 +55,12 @@ func enableCors(w *http.ResponseWriter) {
 func RunBlocking() {
 	uid := os.Getuid()
 	if uid == 0 {
-		log.Println(cli.Yellow, "You're running this program as root (UID 0)", cli.Reset)
-		log.Println(cli.Yellow, "This isn't reccomended unless you're using Docker", cli.Reset)
+		log.Println(cli.Format(
+			"You're running this program as root (UID 0)", cli.Yellow,
+		))
+		log.Println(cli.Format(
+			"This isn't reccomended unless you're using Docker", cli.Yellow,
+		))
 	}
 
 	service := new(Service)
@@ -63,6 +72,23 @@ func RunBlocking() {
 	http.HandleFunc("/rpc", serveHTTP)
 	http.Handle("/rpc-ws", websocket.Handler(serveWS))
 
-	log.Printf("Started RPC server on port %s\n/rpc\t-> HTTP POST Handler\n/rpc-ws\t-> WebSocket Handler\n", port)
-	http.ListenAndServe(fmt.Sprintf(":%s", port), nil)
+	fmt.Println(`        __         ____         ___  ___  _____`)
+	fmt.Println(`  __ __/ /________/ / /__  ____/ _ \/ _ \/ ___/`)
+	fmt.Println(` / // / __/___/ _  / / _ \/___/ , _/ ___/ /__`)
+	fmt.Println(` \_, /\__/    \_._/_/ .__/   /_/|_/_/   \___/`)
+	fmt.Println(`/___/              /_/`)
+
+	fmt.Println(
+		"\n"+cli.Format("/rpc", cli.BgBlue)+"\t HTTP POST Handler",
+		"\n"+cli.Format("/rpc-ws", cli.BgBlue)+"\t WebSocket Handler\n",
+	)
+	log.Println("Driver in use:", driver)
+	log.Println("Started RPC server on port", port)
+
+	err = http.ListenAndServe(fmt.Sprintf("0.0.0.0:%s", port), nil)
+	if err != nil {
+		log.Fatalln(cli.Format(
+			fmt.Sprintf("Failed to bind port %s: already in use", port), cli.BgRed,
+		))
+	}
 }
