@@ -97,8 +97,8 @@ func (p *Process) Start() {
 		}
 	}()
 
-	// debounce the unmarshal operation by 500ms (consumer)
-	go rx.Debounce(time.Millisecond*500, eventChan, func(text string) {
+	// do the unmarshal operation every 500ms (consumer)
+	go rx.Sample(time.Millisecond*500, eventChan, func(text string) {
 		stdout := ProgressTemplate{}
 		err := json.Unmarshal([]byte(text), &stdout)
 		if err == nil {
@@ -107,6 +107,8 @@ func (p *Process) Start() {
 				Speed:      stdout.Speed,
 				ETA:        stdout.Eta,
 			})
+			shortId := strings.Split(p.id, "-")[0]
+			log.Printf("[%s] %s %s\n", shortId, p.url, p.Progress.Percentage)
 		}
 	})
 	// ------------- end progress block ------------- //
